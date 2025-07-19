@@ -1,0 +1,554 @@
+triageRules:
+  # CRITICAL - IMMEDIATE INTERVENTION REQUIRED (BLACK/RED)
+  - id: cardiac_arrest
+    name: Cardiac Arrest
+    condition: "patient.circulation === 'absent' && patient.breathing === 'absent'"
+    priority: BLACK
+    confidence: 0.98
+    actions:
+      - "Initiate CPR immediately"
+      - "Apply AED if available"
+      - "Call for advanced life support"
+      - "Document time of arrest"
+    isCritical: true
+
+  - id: respiratory_arrest
+    name: Respiratory Arrest
+    condition: "patient.breathing === 'absent' && patient.circulation !== 'absent'"
+    priority: RED
+    confidence: 0.95
+    actions:
+      - "Open airway immediately"
+      - "Begin rescue breathing"
+      - "Prepare for intubation"
+      - "Monitor for cardiac arrest"
+    reassess_time: 1
+    isCritical: true
+
+  - id: severe_airway_obstruction
+    name: Severe Airway Obstruction
+    condition: "patient.breathing === 'severe' && patient.consciousness !== 'alert'"
+    priority: RED
+    confidence: 0.92
+    actions:
+      - "Clear airway obstruction"
+      - "Position for optimal breathing"
+      - "Prepare for emergency intubation"
+      - "Monitor oxygen saturation"
+    reassess_time: 2
+    isCritical: true
+
+  - id: massive_hemorrhage
+    name: Massive Hemorrhage
+    condition: "patient.bleeding === 'severe' || (patient.circulation === 'weak' && patient.bleeding === 'moderate')"
+    priority: RED
+    confidence: 0.90
+    actions:
+      - "Apply direct pressure to bleeding site"
+      - "Use tourniquet for extremity bleeding"
+      - "Elevate affected area if possible"
+      - "Prepare for blood transfusion"
+      - "Monitor for signs of shock"
+    reassess_time: 3
+    isCritical: true
+
+  - id: tension_pneumothorax
+    name: Tension Pneumothorax
+    condition: "patient.breathing === 'severe' && patient.circulation === 'weak' && patient.mechanism_of_injury === 'penetrating'"
+    priority: RED
+    confidence: 0.85
+    actions:
+      - "Prepare for needle decompression"
+      - "Monitor for tracheal deviation"
+      - "Assess for decreased breath sounds"
+      - "Prepare for chest tube insertion"
+    reassess_time: 2
+    isCritical: true
+
+  - id: severe_head_injury
+    name: Severe Head Injury
+    condition: "patient.consciousness === 'unresponsive' && patient.mechanism_of_injury === 'blunt'"
+    priority: RED
+    confidence: 0.88
+    actions:
+      - "Protect cervical spine"
+      - "Monitor Glasgow Coma Scale"
+      - "Assess pupil response"
+      - "Prepare for CT scan"
+      - "Monitor for signs of increased ICP"
+    reassess_time: 5
+    isCritical: true
+
+  - id: spinal_cord_injury
+    name: Spinal Cord Injury
+    condition: "patient.mobility === 'none' && patient.mechanism_of_injury === 'fall' || patient.mechanism_of_injury === 'mva'"
+    priority: RED
+    confidence: 0.82
+    actions:
+      - "Immobilize cervical spine"
+      - "Log roll patient if needed"
+      - "Assess neurological function"
+      - "Monitor respiratory function"
+      - "Prepare for spinal imaging"
+    reassess_time: 5
+    isCritical: true
+
+  - id: severe_burns
+    name: Severe Burns
+    condition: "patient.mechanism_of_injury === 'burn' && (patient.pain || 0) >= 8"
+    priority: RED
+    confidence: 0.80
+    actions:
+      - "Cool burns with room temperature water"
+      - "Remove jewelry and constrictive items"
+      - "Cover with sterile dressing"
+      - "Assess burn depth and extent"
+      - "Prepare for burn center transfer"
+    reassess_time: 10
+    isCritical: true
+
+  # URGENT - IMMEDIATE ATTENTION NEEDED (RED)
+  - id: chest_pain_acs
+    name: Acute Coronary Syndrome
+    condition: "patient.cardiac?.chest_pain === 'severe' && patient.circulation === 'weak'"
+    priority: RED
+    confidence: 0.85
+    actions:
+      - "Administer aspirin if not allergic"
+      - "Obtain 12-lead ECG"
+      - "Establish IV access"
+      - "Prepare for cardiac catheterization"
+      - "Monitor cardiac enzymes"
+    reassess_time: 5
+    isCritical: true
+
+  - id: stroke_symptoms
+    name: Acute Stroke
+    condition: "patient.consciousness === 'verbal' && patient.neurological?.pupils === 'unequal'"
+    priority: RED
+    confidence: 0.78
+    actions:
+      - "Perform FAST assessment"
+      - "Check blood glucose"
+      - "Obtain CT scan"
+      - "Prepare for thrombolytics if indicated"
+      - "Monitor neurological status"
+    reassess_time: 5
+    isCritical: true
+
+  - id: severe_hypoglycemia
+    name: Severe Hypoglycemia
+    condition: "patient.consciousness === 'verbal' && patient.vital_signs?.blood_pressure_systolic < 90"
+    priority: RED
+    confidence: 0.75
+    actions:
+      - "Check blood glucose"
+      - "Administer IV dextrose"
+      - "Monitor mental status"
+      - "Assess for underlying cause"
+    reassess_time: 5
+    isCritical: true
+
+  - id: severe_dehydration
+    name: Severe Dehydration
+    condition: "patient.circulation === 'weak' && patient.skin?.moisture === 'dry' && patient.vital_signs?.heart_rate > 120"
+    priority: RED
+    confidence: 0.70
+    actions:
+      - "Establish IV access"
+      - "Begin fluid resuscitation"
+      - "Monitor vital signs"
+      - "Assess for underlying cause"
+    reassess_time: 10
+    isCritical: true
+
+  # URGENT - RAPID ASSESSMENT NEEDED (YELLOW)
+  - id: moderate_chest_pain
+    name: Moderate Chest Pain
+    condition: "patient.cardiac?.chest_pain === 'moderate' && patient.consciousness === 'alert'"
+    priority: YELLOW
+    confidence: 0.75
+    actions:
+      - "Obtain 12-lead ECG"
+      - "Monitor cardiac enzymes"
+      - "Assess risk factors"
+      - "Consider stress test"
+    reassess_time: 15
+
+  - id: respiratory_distress
+    name: Respiratory Distress
+    condition: "patient.breathing === 'difficulty' && patient.consciousness === 'alert'"
+    priority: YELLOW
+    confidence: 0.70
+    actions:
+      - "Position for comfort"
+      - "Monitor oxygen saturation"
+      - "Assess breath sounds"
+      - "Consider chest X-ray"
+    reassess_time: 10
+
+  - id: moderate_bleeding
+    name: Moderate Bleeding
+    condition: "patient.bleeding === 'moderate' && patient.circulation === 'normal'"
+    priority: YELLOW
+    confidence: 0.65
+    actions:
+      - "Apply pressure dressing"
+      - "Monitor for signs of shock"
+      - "Assess for underlying cause"
+      - "Prepare for sutures if needed"
+    reassess_time: 15
+
+  - id: abdominal_pain
+    name: Acute Abdominal Pain
+    condition: "patient.abdominal?.tenderness === 'moderate' && patient.consciousness === 'alert'"
+    priority: YELLOW
+    confidence: 0.68
+    actions:
+      - "Assess for rebound tenderness"
+      - "Check for rigidity"
+      - "Monitor vital signs"
+      - "Consider imaging studies"
+    reassess_time: 20
+
+  - id: fracture_suspicion
+    name: Suspected Fracture
+    condition: "patient.mobility === 'limited' && patient.mechanism_of_injury === 'fall'"
+    priority: YELLOW
+    confidence: 0.60
+    actions:
+      - "Immobilize affected area"
+      - "Assess neurovascular status"
+      - "Obtain X-rays"
+      - "Consider orthopedic consultation"
+    reassess_time: 30
+
+  - id: altered_mental_status
+    name: Altered Mental Status
+    condition: "patient.consciousness === 'pain' && patient.consciousness !== 'unresponsive'"
+    priority: YELLOW
+    confidence: 0.65
+    actions:
+      - "Check blood glucose"
+      - "Assess neurological function"
+      - "Monitor vital signs"
+      - "Consider toxicology screen"
+    reassess_time: 15
+
+  - id: moderate_pain
+    name: Moderate Pain
+    condition: "(patient.pain || 0) >= 6 && patient.consciousness === 'alert'"
+    priority: YELLOW
+    confidence: 0.55
+    actions:
+      - "Assess pain characteristics"
+      - "Consider pain management"
+      - "Monitor response to treatment"
+      - "Document pain scale"
+    reassess_time: 30
+
+  # MINOR - ROUTINE CARE (GREEN)
+  - id: minor_injuries
+    name: Minor Injuries
+    condition: "patient.mobility === 'normal' && (patient.pain || 0) <= 4 && patient.bleeding === 'none'"
+    priority: GREEN
+    confidence: 0.85
+    actions:
+      - "Provide basic first aid"
+      - "Give self-care instructions"
+      - "Schedule follow-up if needed"
+      - "Document injury"
+    reassess_time: 60
+
+  - id: minor_pain
+    name: Minor Pain/Discomfort
+    condition: "(patient.pain || 0) <= 3 && patient.consciousness === 'alert'"
+    priority: GREEN
+    confidence: 0.80
+    actions:
+      - "Provide comfort measures"
+      - "Consider over-the-counter pain relief"
+      - "Give home care instructions"
+      - "Schedule follow-up if needed"
+    reassess_time: 60
+
+  - id: routine_checkup
+    name: Routine Checkup
+    condition: "patient.consciousness === 'alert' && patient.breathing === 'normal' && patient.circulation === 'normal'"
+    priority: GREEN
+    confidence: 0.90
+    actions:
+      - "Complete routine assessment"
+      - "Update medical history"
+      - "Provide preventive care"
+      - "Schedule next appointment"
+    reassess_time: 120
+
+assessmentFlow:
+  - id: consciousness
+    question: "What is the patient's level of consciousness?"
+    type: single
+    field: consciousness
+    required: true
+    options:
+      - value: alert
+        label: Alert and oriented to person, place, time
+        color: green
+        description: "Patient is fully awake and aware"
+      - value: verbal
+        label: Responds to voice but not fully oriented
+        color: yellow
+        description: "Patient responds to verbal commands"
+      - value: pain
+        label: Responds only to painful stimuli
+        color: orange
+        critical: true
+        description: "Patient only responds to pain"
+      - value: unresponsive
+        label: No response to any stimuli
+        color: red
+        critical: true
+        description: "Patient is completely unresponsive"
+
+  - id: breathing
+    question: "How is the patient's breathing?"
+    type: single
+    field: breathing
+    required: true
+    options:
+      - value: normal
+        label: Normal, unlabored breathing
+        color: green
+        description: "Breathing appears normal"
+      - value: difficulty
+        label: Some difficulty breathing
+        color: yellow
+        description: "Patient is working harder to breathe"
+      - value: severe
+        label: Severe breathing distress
+        color: red
+        critical: true
+        description: "Patient is struggling to breathe"
+      - value: absent
+        label: No breathing detected
+        color: gray
+        critical: true
+        description: "No breathing movement observed"
+
+  - id: circulation
+    question: "What is the patient's circulation status?"
+    type: single
+    field: circulation
+    required: true
+    options:
+      - value: normal
+        label: Strong, regular pulse
+        color: green
+        description: "Pulse is strong and regular"
+      - value: weak
+        label: Weak or irregular pulse
+        color: yellow
+        critical: true
+        description: "Pulse is weak or irregular"
+      - value: absent
+        label: No pulse detected
+        color: gray
+        critical: true
+        description: "No pulse can be felt"
+
+  - id: bleeding
+    question: "Is there any visible bleeding?"
+    type: single
+    field: bleeding
+    required: true
+    options:
+      - value: none
+        label: No bleeding visible
+        color: green
+        description: "No signs of bleeding"
+      - value: minor
+        label: Minor, easily controlled bleeding
+        color: yellow
+        description: "Small amount of bleeding that stops with pressure"
+      - value: moderate
+        label: Moderate bleeding
+        color: orange
+        description: "Significant bleeding that requires attention"
+      - value: severe
+        label: Severe, uncontrolled bleeding
+        color: red
+        critical: true
+        description: "Heavy bleeding that is difficult to control"
+
+  - id: pain
+    question: "Rate the patient's pain level (1-10, where 10 is worst possible)"
+    type: scale
+    field: pain
+    required: true
+    skip_if: "patient.consciousness === 'unresponsive'"
+    description: "Pain scale assessment"
+    help_text: "1-3: Mild pain, 4-6: Moderate pain, 7-10: Severe pain"
+
+  - id: mobility
+    question: "Can the patient move normally?"
+    type: single
+    field: mobility
+    required: false
+    skip_if: "patient.consciousness === 'unresponsive'"
+    options:
+      - value: normal
+        label: Can walk and move normally
+        color: green
+        description: "No mobility restrictions"
+      - value: limited
+        label: Limited movement ability
+        color: yellow
+        description: "Some difficulty with movement"
+      - value: none
+        label: Cannot move
+        color: red
+        critical: true
+        description: "Complete loss of mobility"
+
+  - id: mechanism_of_injury
+    question: "What caused the injury or medical condition?"
+    type: single
+    field: mechanism_of_injury
+    required: false
+    options:
+      - value: none
+        label: No injury - medical condition
+        color: green
+      - value: fall
+        label: Fall from height or ground level
+        color: yellow
+      - value: mva
+        label: Motor vehicle accident
+        color: red
+        critical: true
+      - value: penetrating
+        label: Penetrating injury (stab, gunshot)
+        color: red
+        critical: true
+      - value: blunt
+        label: Blunt trauma (assault, sports)
+        color: orange
+      - value: burn
+        label: Burn injury
+        color: red
+        critical: true
+      - value: other
+        label: Other mechanism
+        color: yellow
+
+  - id: neurological_pupils
+    question: "What is the patient's pupil response?"
+    type: single
+    field: neurological.pupils
+    required: false
+    skip_if: "patient.consciousness === 'unresponsive'"
+    options:
+      - value: normal
+        label: Normal, equal, reactive pupils
+        color: green
+        description: "Pupils are normal size and respond to light"
+      - value: dilated
+        label: Dilated pupils
+        color: yellow
+        description: "Pupils are larger than normal"
+      - value: constricted
+        label: Constricted pupils
+        color: yellow
+        description: "Pupils are smaller than normal"
+      - value: unequal
+        label: Unequal pupil size
+        color: red
+        critical: true
+        description: "One pupil is different size than the other"
+      - value: non-reactive
+        label: Non-reactive pupils
+        color: red
+        critical: true
+        description: "Pupils do not respond to light"
+
+  - id: cardiac_chest_pain
+    question: "Does the patient have chest pain?"
+    type: single
+    field: cardiac.chest_pain
+    required: false
+    skip_if: "patient.consciousness === 'unresponsive'"
+    options:
+      - value: none
+        label: No chest pain
+        color: green
+        description: "No chest discomfort"
+      - value: mild
+        label: Mild chest discomfort
+        color: yellow
+        description: "Slight chest discomfort"
+      - value: moderate
+        label: Moderate chest pain
+        color: orange
+        description: "Significant chest pain"
+      - value: severe
+        label: Severe chest pain
+        color: red
+        critical: true
+        description: "Intense chest pain"
+
+  - id: respiratory_breath_sounds
+    question: "What are the patient's breath sounds?"
+    type: single
+    field: respiratory.breath_sounds
+    required: false
+    skip_if: "patient.breathing === 'absent'"
+    options:
+      - value: normal
+        label: Normal breath sounds
+        color: green
+        description: "Clear breath sounds throughout"
+      - value: decreased
+        label: Decreased breath sounds
+        color: yellow
+        description: "Reduced breath sounds in some areas"
+      - value: absent
+        label: Absent breath sounds
+        color: red
+        critical: true
+        description: "No breath sounds in some areas"
+      - value: wheezing
+        label: Wheezing
+        color: yellow
+        description: "High-pitched whistling sounds"
+      - value: crackles
+        label: Crackles (rales)
+        color: yellow
+        description: "Popping or bubbling sounds"
+
+  - id: skin_assessment
+    question: "What is the patient's skin condition?"
+    type: single
+    field: skin.color
+    required: false
+    options:
+      - value: normal
+        label: Normal skin color
+        color: green
+        description: "Normal skin appearance"
+      - value: pale
+        label: Pale skin
+        color: yellow
+        description: "Unusually pale appearance"
+      - value: cyanotic
+        label: Blue/purple tint (cyanosis)
+        color: red
+        critical: true
+        description: "Blue discoloration indicating low oxygen"
+      - value: jaundiced
+        label: Yellow tint (jaundice)
+        color: yellow
+        description: "Yellow discoloration"
+      - value: flushed
+        label: Red/flushed appearance
+        color: yellow
+        description: "Unusually red appearance"
