@@ -31,25 +31,40 @@ interface PathStep {
 	answer: string;
 }
 
-const TriageDecisionTree: React.FC<{role:string}> = ({role}) => {
+
+const TriageDecisionTree = ({
+		role
+	}: {role:string|null}) => {
+
 	const [currentNode, setCurrentNode] = useState<string>("start");
 	const [path, setPath] = useState<PathStep[]>([]);
-	const [patientInfo, setPatientInfo] = useState<Record<string, unknown>>({});
 	const [nodes, setNodes] = useState<Record<string, Node>>({});
-	
+	const [invalidRole, setInvalidRole] = useState<boolean>(false);
+	const [loadingData, setLoadingData] = useState<boolean>(true);
 
 	useEffect(() => {
 		const fetchTriageData = async () => {
+
+			if (!role) {
+				setInvalidRole(true);
+				setLoadingData(false);
+				return;
+			}
+
 			const res = await fetch("/data/triage.yaml");
 			const text = await res.text();
-			const data = yaml.load(text) as Record<string, Node>;
-			setNodes(data);
+			const data = yaml.load(text) as Record<string, Record<string, Node>>;
+			
+			if (!data[role]) {
+				setInvalidRole(true);
+			}else {
+				setNodes(data[role]);
+			}
+			setLoadingData(false);
 		};
 		fetchTriageData();
 	}, []);
 	
-
-
 	const handleAnswer = (answer: Answer): void => {
 		setPath([...path, { node: currentNode, answer: answer.text }]);
 		setCurrentNode(answer.next);
@@ -69,7 +84,6 @@ const TriageDecisionTree: React.FC<{role:string}> = ({role}) => {
 	const restart = (): void => {
 		setCurrentNode("start");
 		setPath([]);
-		setPatientInfo({});
 	};
 
 	const currentNodeData: Node = nodes[currentNode];
@@ -81,6 +95,14 @@ const TriageDecisionTree: React.FC<{role:string}> = ({role}) => {
 		if (priority?.includes("BLACK")) return <Users className="w-6 h-6" />;
 		return null;
 	};
+
+	if (loadingData) {
+		return <div>Loading data...</div>;
+	}
+
+	if (invalidRole) {
+		return <div>The following role is not supported: {role}</div>;
+	}
 
 	return (
 		<div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
