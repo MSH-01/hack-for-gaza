@@ -1,6 +1,7 @@
 "use client";
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import yaml from "js-yaml";
 import {
 	ChevronRight,
 	ChevronLeft,
@@ -30,335 +31,24 @@ interface PathStep {
 	answer: string;
 }
 
-const TriageDecisionTree: React.FC = () => {
+const TriageDecisionTree: React.FC<{role:string}> = ({role}) => {
 	const [currentNode, setCurrentNode] = useState<string>("start");
 	const [path, setPath] = useState<PathStep[]>([]);
 	const [patientInfo, setPatientInfo] = useState<Record<string, unknown>>({});
+	const [nodes, setNodes] = useState<Record<string, Node>>({});
+	
 
-	const nodes: Record<string, Node> = {
-		start: {
-			question: "Patient Assessment - Can you hear me? Are you responsive?",
-			type: "question",
-			answers: [
-				{
-					text: "Yes, responsive and alert",
-					next: "breathing_check",
-					color: "bg-green-100",
-				},
-				{
-					text: "Responds to voice/touch but confused",
-					next: "altered_consciousness",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "No response/unconscious",
-					next: "unconscious_check",
-					color: "bg-red-100",
-				},
-			],
-		},
+	useEffect(() => {
+		const fetchTriageData = async () => {
+			const res = await fetch("/data/triage.yaml");
+			const text = await res.text();
+			const data = yaml.load(text) as Record<string, Node>;
+			setNodes(data);
+		};
+		fetchTriageData();
+	}, []);
+	
 
-		breathing_check: {
-			question: "Are you having any trouble breathing right now?",
-			type: "question",
-			answers: [
-				{
-					text: "Normal breathing, no distress",
-					next: "circulation_check",
-					color: "bg-green-100",
-				},
-				{
-					text: "Some difficulty, but talking in full sentences",
-					next: "moderate_breathing",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "Severe difficulty, can't speak full sentences",
-					next: "severe_breathing",
-					color: "bg-red-100",
-				},
-			],
-		},
-
-		circulation_check: {
-			question: "Any visible bleeding or signs of shock?",
-			type: "question",
-			answers: [
-				{
-					text: "No bleeding, normal skin color",
-					next: "mobility_check",
-					color: "bg-green-100",
-				},
-				{
-					text: "Minor bleeding, controlled easily",
-					next: "minor_bleeding",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "Severe bleeding, pale/cold skin",
-					next: "severe_bleeding",
-					color: "bg-red-100",
-				},
-			],
-		},
-
-		mobility_check: {
-			question: "Can you walk without assistance?",
-			type: "question",
-			answers: [
-				{
-					text: "Yes, can walk normally",
-					next: "pain_assessment",
-					color: "bg-green-100",
-				},
-				{
-					text: "Can walk with some help",
-					next: "limited_mobility",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "Cannot walk/move legs",
-					next: "mobility_concern",
-					color: "bg-red-100",
-				},
-			],
-		},
-
-		pain_assessment: {
-			question:
-				"Rate your pain from 1-10, where 10 is the worst pain imaginable",
-			type: "question",
-			answers: [
-				{
-					text: "1-3 (Mild pain)",
-					next: "green_triage",
-					color: "bg-green-100",
-				},
-				{
-					text: "4-6 (Moderate pain)",
-					next: "yellow_triage_pain",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "7-10 (Severe pain)",
-					next: "pain_location",
-					color: "bg-orange-100",
-				},
-			],
-		},
-
-		pain_location: {
-			question: "Where is the severe pain located?",
-			type: "question",
-			answers: [
-				{
-					text: "Chest, abdomen, or head",
-					next: "red_triage",
-					color: "bg-red-100",
-				},
-				{
-					text: "Back, neck, or spine",
-					next: "red_triage",
-					color: "bg-red-100",
-				},
-				{
-					text: "Arms, legs, or other extremities",
-					next: "yellow_triage",
-					color: "bg-yellow-100",
-				},
-			],
-		},
-
-		unconscious_check: {
-			question: "Check pulse and breathing",
-			type: "question",
-			answers: [
-				{
-					text: "Has pulse and breathing",
-					next: "red_triage",
-					color: "bg-red-100",
-				},
-				{
-					text: "No pulse or breathing",
-					next: "black_triage",
-					color: "bg-gray-800 text-white",
-				},
-			],
-		},
-
-		altered_consciousness: {
-			question:
-				"Can they follow simple commands? (Squeeze my hand, open your eyes)",
-			type: "question",
-			answers: [
-				{
-					text: "Yes, follows commands",
-					next: "breathing_check",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "No, cannot follow commands",
-					next: "red_triage",
-					color: "bg-red-100",
-				},
-			],
-		},
-
-		severe_breathing: {
-			question: "Emergency airway assessment needed",
-			type: "result",
-			priority: "RED - IMMEDIATE",
-			color: "bg-red-500 text-white",
-			actions: [
-				"Check airway obstruction",
-				"Position for optimal breathing",
-				"Consider assisted ventilation",
-				"Immediate medical attention required",
-			],
-		},
-
-		severe_bleeding: {
-			question: "Emergency hemorrhage control needed",
-			type: "result",
-			priority: "RED - IMMEDIATE",
-			color: "bg-red-500 text-white",
-			actions: [
-				"Apply direct pressure",
-				"Elevate if possible",
-				"Consider tourniquet if limb bleeding",
-				"Monitor for shock signs",
-			],
-		},
-
-		red_triage: {
-			question: "Immediate Priority Patient",
-			type: "result",
-			priority: "RED - IMMEDIATE",
-			color: "bg-red-500 text-white",
-			actions: [
-				"Life-threatening condition present",
-				"Requires immediate medical attention",
-				"Continuous monitoring needed",
-				"Prepare for rapid transport",
-			],
-		},
-
-		yellow_triage: {
-			question: "Urgent Priority Patient",
-			type: "result",
-			priority: "YELLOW - URGENT",
-			color: "bg-yellow-500 text-white",
-			actions: [
-				"Stable but requires medical attention",
-				"Monitor for deterioration",
-				"Can wait for available resources",
-				"Document injury details",
-			],
-		},
-
-		yellow_triage_pain: {
-			question: "Urgent Priority Patient",
-			type: "result",
-			priority: "YELLOW - URGENT",
-			color: "bg-yellow-500 text-white",
-			actions: [
-				"Moderate pain requires assessment",
-				"Monitor pain progression",
-				"Consider pain management",
-				"Schedule for medical evaluation",
-			],
-		},
-
-		green_triage: {
-			question: "Minor Priority Patient",
-			type: "result",
-			priority: "GREEN - MINOR",
-			color: "bg-green-500 text-white",
-			actions: [
-				"Minor injury or illness",
-				"Can wait for treatment",
-				"Provide basic first aid",
-				"Self-care instructions appropriate",
-			],
-		},
-
-		black_triage: {
-			question: "Deceased/Expectant",
-			type: "result",
-			priority: "BLACK - DECEASED",
-			color: "bg-gray-800 text-white",
-			actions: [
-				"No vital signs present",
-				"Confirm with medical authority",
-				"Document time and circumstances",
-				"Notify appropriate personnel",
-			],
-		},
-
-		moderate_breathing: {
-			question: "Any chest pain or tightness?",
-			type: "question",
-			answers: [
-				{
-					text: "Yes, chest pain present",
-					next: "red_triage",
-					color: "bg-red-100",
-				},
-				{
-					text: "No chest pain",
-					next: "yellow_triage",
-					color: "bg-yellow-100",
-				},
-			],
-		},
-
-		minor_bleeding: {
-			question: "Is bleeding from head/neck/torso area?",
-			type: "question",
-			answers: [
-				{
-					text: "Yes, bleeding from head/neck/torso",
-					next: "yellow_triage",
-					color: "bg-yellow-100",
-				},
-				{
-					text: "No, bleeding from extremities only",
-					next: "circulation_check",
-					color: "bg-green-100",
-				},
-			],
-		},
-
-		limited_mobility: {
-			question: "Any back or neck pain?",
-			type: "question",
-			answers: [
-				{
-					text: "Yes, back or neck pain",
-					next: "red_triage",
-					color: "bg-red-100",
-				},
-				{
-					text: "No spinal pain",
-					next: "yellow_triage",
-					color: "bg-yellow-100",
-				},
-			],
-		},
-
-		mobility_concern: {
-			question: "Potential spinal injury - exercise extreme caution",
-			type: "result",
-			priority: "RED - IMMEDIATE",
-			color: "bg-red-500 text-white",
-			actions: [
-				"Do not move patient unnecessarily",
-				"Maintain spinal immobilization",
-				"Check sensation in extremities",
-				"Immediate medical evaluation required",
-			],
-		},
-	};
 
 	const handleAnswer = (answer: Answer): void => {
 		setPath([...path, { node: currentNode, answer: answer.text }]);
@@ -396,7 +86,7 @@ const TriageDecisionTree: React.FC = () => {
 		<div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
 			<div className="mb-8">
 				<h1 className="text-3xl font-bold text-gray-800 mb-2">
-					Medical Triage Decision Tree
+					Medical Triage Decision Tree ({role})
 				</h1>
 				<p className="text-gray-600">
 					Follow the questions to determine patient priority level
