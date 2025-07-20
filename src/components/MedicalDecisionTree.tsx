@@ -12,7 +12,7 @@ import {
 	Camera,
 } from "lucide-react";
 import * as yaml from "js-yaml"; // Import the YAML parser
-
+import { downloadPDF, sharePDFViaWhatsApp } from "@/app/managePdf";
 // Import all your interfaces from interfaces.ts
 import type {
 	PatientData,
@@ -565,15 +565,14 @@ const SmartTriageApp: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="text-center mt-8">
-						<div className="flex flex-col sm:flex-row gap-4 justify-center">
-							<button
-								type="button"
-								onClick={restart}
-								className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-							>
-								Start New Assessment
-							</button>
+					<div className="text-center mt-8 flex gap-4 justify-center items-center">
+						<button
+							type="button"
+							onClick={restart}
+							className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						>
+							Start New Assessment
+						</button>
 							<button
 								type="button"
 								onClick={() => setShowQRGenerator(true)}
@@ -581,8 +580,21 @@ const SmartTriageApp: React.FC = () => {
 							>
 								<QrCode className="w-5 h-5 mr-2" />
 								Generate QR Code
-							</button>
-						</div>
+							</button>						
+						<button
+							type="button"
+							onClick={async () => await downloadPDF(triageResult as TriageResult)}
+							className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						>
+							Download PDF
+						</button>
+						<button
+							type="button"
+							onClick={async () => await sharePDFViaWhatsApp(triageResult as TriageResult)}
+							className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						>
+							Share via WhatsApp
+						</button>
 					</div>
 				</div>
 			</div>
