@@ -8,6 +8,8 @@ import {
 	Users,
 	Clock,
 	CheckCircle,
+	QrCode,
+	Camera,
 } from "lucide-react";
 import * as yaml from "js-yaml"; // Import the YAML parser
 
@@ -19,6 +21,8 @@ import type {
 	TriageResult,
 	TriageConfig,
 } from "../interfaces";
+import QRCodeGenerator from "./QRCodeGenerator";
+import QRCodeReader from "./QRCodeReader";
 
 // TriageEngine Class (updated to load from YAML)
 class TriageEngine {
@@ -170,12 +174,14 @@ const SmartTriageApp: React.FC = () => {
 	const [triageResult, setTriageResult] = useState<TriageResult | null>(null);
 	const [isComplete, setIsComplete] = useState(false);
 	const [assessmentStarted, setAssessmentStarted] = useState(false);
-	const [ role, setRole ] = useState<string | null>(null);
+	const [role, setRole] = useState<string | null>(null);
 	// New state for loading and errors
 	const [isLoadingRules, setIsLoadingRules] = useState(true);
 	const [errorLoadingRules, setErrorLoadingRules] = useState<string | null>(
 		null,
 	);
+	const [showQRGenerator, setShowQRGenerator] = useState(false);
+	const [showQRReader, setShowQRReader] = useState(false);
 
 	// Effect to load rules when the component mounts
 	useEffect(() => {
@@ -338,6 +344,11 @@ const SmartTriageApp: React.FC = () => {
 
 	// 3. Show initial welcome screen if assessment hasn't started
 	if (!assessmentStarted) {
+		// Show QR Code Reader if requested
+		if (showQRReader) {
+			return <QRCodeReader onBack={() => setShowQRReader(false)} />;
+		}
+
 		return (
 			<div className="w-full h-screen bg-white flex items-center justify-center">
 				<div className="text-center max-w-4xl px-6">
@@ -382,56 +393,74 @@ const SmartTriageApp: React.FC = () => {
 
 					<div className="mb-8">
 						<div className="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-4">
-							<label htmlFor="role-select" className="block text-md font-semibold text-gray-700 mb-2">
-								What is your role?
-							</label>
-							<div className="flex justify-center space-x-6">
-								<label className="inline-flex items-center text-gray-600">
-									<input
-										type="radio"
-										name="patient"
-										value="A"
-										className="form-radio text-blue-600"
-										onChange={(e) => setRole(e.target.value.toLocaleLowerCase())}
-									/>
-									<span className="ml-2">Doctor</span>
-								</label>
-								<label className="inline-flex items-center text-gray-600">
-									<input
-										type="radio"
-										name="patient"
-										value="B"
-										className="form-radio text-blue-600"
-										onChange={(e) => setRole(e.target.value.toLocaleLowerCase())}
-									/>
-									<span className="ml-2">Volunteer</span>
-								</label>
-								<label className="inline-flex items-center text-gray-600">
-									<input
-										type="radio"
-										name="patient"
-										value="C"
-										className="form-radio text-blue-600"
-										onChange={(e) => setRole(e.target.value.toLocaleLowerCase())}
-									/>
-									<span className="ml-2">Patient</span>
-								</label>
-							</div>
+							<fieldset>
+								<legend className="block text-md font-semibold text-gray-700 mb-2">
+									What is your role?
+								</legend>
+								<div className="flex justify-center space-x-6">
+									<label className="inline-flex items-center text-gray-600">
+										<input
+											type="radio"
+											name="patient"
+											value="A"
+											className="form-radio text-blue-600"
+											onChange={(e) =>
+												setRole(e.target.value.toLocaleLowerCase())
+											}
+										/>
+										<span className="ml-2">Doctor</span>
+									</label>
+									<label className="inline-flex items-center text-gray-600">
+										<input
+											type="radio"
+											name="patient"
+											value="B"
+											className="form-radio text-blue-600"
+											onChange={(e) =>
+												setRole(e.target.value.toLocaleLowerCase())
+											}
+										/>
+										<span className="ml-2">Volunteer</span>
+									</label>
+									<label className="inline-flex items-center text-gray-600">
+										<input
+											type="radio"
+											name="patient"
+											value="C"
+											className="form-radio text-blue-600"
+											onChange={(e) =>
+												setRole(e.target.value.toLocaleLowerCase())
+											}
+										/>
+										<span className="ml-2">Patient</span>
+									</label>
+								</div>
+							</fieldset>
 						</div>
 					</div>
 
-					<button
-						type="button"
-						onClick={startAssessment}
-						className={`px-8 py-4 text-white text-lg font-semibold rounded-lg transition-colors ${
-							role === null
-								? "bg-gray-400 cursor-not-allowed"
-								: "bg-blue-600 hover:bg-blue-700"
-						}`}
-						disabled={role === null}
-					>
-						Start Patient Assessment
-					</button>
+					<div className="flex flex-col sm:flex-row gap-4 justify-center">
+						<button
+							type="button"
+							onClick={startAssessment}
+							className={`px-8 py-4 text-white text-lg font-semibold rounded-lg transition-colors ${
+								role === null
+									? "bg-gray-400 cursor-not-allowed"
+									: "bg-blue-600 hover:bg-blue-700"
+							}`}
+							disabled={role === null}
+						>
+							Start Patient Assessment
+						</button>
+						<button
+							type="button"
+							onClick={() => setShowQRReader(true)}
+							className="px-8 py-4 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+						>
+							<Camera className="w-5 h-5 mr-2" />
+							Scan QR Code
+						</button>
+					</div>
 				</div>
 			</div>
 		);
@@ -439,6 +468,17 @@ const SmartTriageApp: React.FC = () => {
 
 	// 4. Show triage result if assessment is complete
 	if (isComplete && triageResult) {
+		// Show QR Code Generator Modal if requested
+		if (showQRGenerator) {
+			return (
+				<QRCodeGenerator
+					triageResult={triageResult}
+					patientData={patientData}
+					onClose={() => setShowQRGenerator(false)}
+				/>
+			);
+		}
+
 		return (
 			<div className="w-full min-h-screen bg-white p-6">
 				<div className="max-w-4xl mx-auto">
@@ -493,7 +533,7 @@ const SmartTriageApp: React.FC = () => {
 								Medical Reasoning:
 							</h3>
 							<div className="space-y-2">
-								{triageResult.matchedRules.map((rule, index) => (
+								{triageResult.matchedRules.map((rule) => (
 									<div key={rule.id} className="text-sm">
 										<span className="font-medium text-blue-700">
 											{rule.name}
@@ -526,13 +566,23 @@ const SmartTriageApp: React.FC = () => {
 					</div>
 
 					<div className="text-center mt-8">
-						<button
-							type="button"
-							onClick={restart}
-							className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-						>
-							Start New Assessment
-						</button>
+						<div className="flex flex-col sm:flex-row gap-4 justify-center">
+							<button
+								type="button"
+								onClick={restart}
+								className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							>
+								Start New Assessment
+							</button>
+							<button
+								type="button"
+								onClick={() => setShowQRGenerator(true)}
+								className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+							>
+								<QrCode className="w-5 h-5 mr-2" />
+								Generate QR Code
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
