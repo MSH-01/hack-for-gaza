@@ -170,6 +170,7 @@ const SmartTriageApp: React.FC = () => {
 	const [triageResult, setTriageResult] = useState<TriageResult | null>(null);
 	const [isComplete, setIsComplete] = useState(false);
 	const [assessmentStarted, setAssessmentStarted] = useState(false);
+	const [ role, setRole ] = useState<string | null>(null);
 	// New state for loading and errors
 	const [isLoadingRules, setIsLoadingRules] = useState(true);
 	const [errorLoadingRules, setErrorLoadingRules] = useState<string | null>(
@@ -379,10 +380,55 @@ const SmartTriageApp: React.FC = () => {
 						</div>
 					</div>
 
+					<div className="mb-8">
+						<div className="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-4">
+							<label className="block text-md font-semibold text-gray-700 mb-2">
+								What is your role?
+							</label>
+							<div className="flex justify-center space-x-6">
+								<label className="inline-flex items-center text-gray-600">
+									<input
+										type="radio"
+										name="patient"
+										value="A"
+										className="form-radio text-blue-600"
+										onChange={(e) => setRole(e.target.value.toLocaleLowerCase())}
+									/>
+									<span className="ml-2">Doctor</span>
+								</label>
+								<label className="inline-flex items-center text-gray-600">
+									<input
+										type="radio"
+										name="patient"
+										value="B"
+										className="form-radio text-blue-600"
+										onChange={(e) => setRole(e.target.value.toLocaleLowerCase())}
+									/>
+									<span className="ml-2">Volunteer</span>
+								</label>
+								<label className="inline-flex items-center text-gray-600">
+									<input
+										type="radio"
+										name="patient"
+										value="C"
+										className="form-radio text-blue-600"
+										onChange={(e) => setRole(e.target.value.toLocaleLowerCase())}
+									/>
+									<span className="ml-2">Patient</span>
+								</label>
+							</div>
+						</div>
+					</div>
+
 					<button
 						type="button"
 						onClick={startAssessment}
-						className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+						className={`px-8 py-4 text-white text-lg font-semibold rounded-lg transition-colors ${
+							role === null
+								? "bg-gray-400 cursor-not-allowed"
+								: "bg-blue-600 hover:bg-blue-700"
+						}`}
+						disabled={role === null}
 					>
 						Start Patient Assessment
 					</button>
