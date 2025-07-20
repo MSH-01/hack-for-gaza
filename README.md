@@ -83,6 +83,50 @@ If you experience infinite compile loops with Serwist:
 - Push notification support (configured but not implemented)
 - Install prompt for mobile devices
 
+## 📱 QR Code Features
+
+The app now includes comprehensive QR code functionality for sharing and accessing triage results:
+
+### QR Code Generation
+
+- **Generate QR Codes**: After completing a triage assessment, users can generate a QR code containing all triage data
+- **Complete Data Export**: QR codes include:
+  - Triage priority and confidence level
+  - Required actions and reassessment time
+  - Matched medical rules and reasoning
+  - Complete patient assessment data
+  - Timestamp of assessment
+- **Download & Share**: QR codes can be downloaded as PNG images or shared via native sharing APIs
+- **Cross-Platform**: Works on both mobile and desktop devices
+
+### QR Code Scanning
+
+- **Camera Integration**: Built-in camera access for scanning QR codes
+- **Image Upload**: Upload images containing QR codes for processing
+- **Dual Mode Support**: Switch between camera scanning and image upload modes
+- **Real-time Scanning**: Live camera feed with QR code detection
+- **Complete Data Import**: Scanned QR codes restore full triage results
+- **Offline Capable**: Scanning works without internet connection
+- **Error Handling**: Graceful handling of invalid or corrupted QR codes
+- **File Format Support**: Accepts JPG, PNG, GIF, and WebP image formats
+
+### Use Cases
+
+- **Emergency Handoffs**: Quickly transfer patient information between medical personnel
+- **Record Keeping**: Save triage results for later reference
+- **Remote Consultation**: Share assessment data with specialists
+- **Training**: Use QR codes for medical training scenarios
+- **Audit Trails**: Maintain digital records of triage decisions
+- **Image Processing**: Process QR codes from screenshots, photos, or scanned documents
+- **Offline Sharing**: Share QR codes via messaging apps or email for later processing
+
+### Technical Implementation
+
+- **QR Code Library**: Uses `qrcode` for generation and `html5-qrcode` for scanning
+- **Data Format**: JSON-encoded data with versioning for future compatibility
+- **Security**: No sensitive data encryption (consider for production use)
+- **Performance**: Optimized for mobile devices with efficient scanning
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 15.4.2
@@ -90,6 +134,8 @@ If you experience infinite compile loops with Serwist:
 - **Styling**: Tailwind CSS 4
 - **Icons**: Lucide React
 - **Fonts**: Geist Sans/Mono
+- **QR Code**: qrcode, html5-qrcode
+- **YAML Parsing**: js-yaml
 
 ## 📄 License
 
