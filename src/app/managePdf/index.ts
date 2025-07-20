@@ -316,7 +316,7 @@ export const downloadPDF = async (results:TriageResult) => {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'test-2.pdf';
+    link.download = 'triage-report.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
