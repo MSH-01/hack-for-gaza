@@ -565,7 +565,7 @@ const SmartTriageApp: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="text-center mt-8 flex gap-4 justify-center items-center">
+					<div className="text-center mt-8 flex gap-4 justify-center items-center flex-wrap">
 						<button
 							type="button"
 							onClick={restart}
