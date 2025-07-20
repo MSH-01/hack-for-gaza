@@ -73,12 +73,6 @@ export function ServiceWorkerRegistration() {
 
 	return (
 		<>
-			{isOffline && (
-				<div className="fixed top-0 left-0 right-0 bg-yellow-500 text-black text-center py-2 px-4 z-50">
-					You are currently offline. Some features may be limited.
-				</div>
-			)}
-
 			{isUpdateAvailable && (
 				<div className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50">
 					<div className="flex items-center space-x-4">
