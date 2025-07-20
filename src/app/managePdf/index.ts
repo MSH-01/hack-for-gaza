@@ -30,9 +30,9 @@ const addHorizontalLine = (manager: PDFManager, thickness: number = 1, color: st
     const match = color.match(/rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)\)/);
     if (match) {
         rgbColor = rgb(
-            parseFloat(match[1]),
-            parseFloat(match[2]),
-            parseFloat(match[3])
+            parseFloat(match[1])/255,
+            parseFloat(match[2])/255,
+            parseFloat(match[3])/255
         );
     }
 
@@ -233,7 +233,9 @@ export const producePDF = async (results:TriageResult) => {
     
 
     const pdfDoc = await PDFDocument.create();
-  
+    
+    const greyHorizontalLineColour = "rgb(128,128,128)"
+
     const manager:PDFManager = {
       currentPage: 0,
       currentXPosition: 0,
@@ -255,7 +257,7 @@ export const producePDF = async (results:TriageResult) => {
         color: "rgb(0, 0.53, 0.71)",
       });
 
-    addHorizontalLine(manager, 1, "rgb(0,0,0)")
+    addHorizontalLine(manager, 1, greyHorizontalLineColour)
 
     await addParagraph(manager, {
         text: "Priority: "+determinePriorityMessage(results.priority),
@@ -263,15 +265,15 @@ export const producePDF = async (results:TriageResult) => {
         color: "rgb(0, 0.53, 0.71)",
       });
 
-    addHorizontalLine(manager, 1, "rgb(0,0,0)")
+    addHorizontalLine(manager, 1, greyHorizontalLineColour)
 
     await addParagraph(manager, {
-        text: "Confidence: "+results.confidence,
+        text: "Confidence: "+Math.floor(results.confidence*1000)/10+"%",
         size: 12,
         color: "rgb(0, 0.53, 0.71)",
       });
 
-    addHorizontalLine(manager, 1, "rgb(0,0,0)")    
+    addHorizontalLine(manager, 1, greyHorizontalLineColour)    
 
     await addParagraph(manager, {
         text: "Reasses: "+results.reassessTime + "minutes",
@@ -279,7 +281,7 @@ export const producePDF = async (results:TriageResult) => {
         color: "rgb(0, 0.53, 0.71)",
       });
 
-    addHorizontalLine(manager, 1, "rgb(0,0,0)")    
+    addHorizontalLine(manager, 1, greyHorizontalLineColour)    
 
     for (let k = 0; k < results.actions.length; k++) {
       let currentAction = results.actions[k]
@@ -290,7 +292,7 @@ export const producePDF = async (results:TriageResult) => {
       });
     }
 
-    addHorizontalLine(manager, 1, "rgb(0,0,0)")
+    addHorizontalLine(manager, 1, greyHorizontalLineColour)
 
     const date = getDate()
     await addParagraph(manager, {
