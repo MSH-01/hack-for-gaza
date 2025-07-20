@@ -382,7 +382,7 @@ const SmartTriageApp: React.FC = () => {
 
 					<div className="mb-8">
 						<div className="bg-gray-100 border border-gray-200 rounded-lg p-4 mb-4">
-							<label className="block text-md font-semibold text-gray-700 mb-2">
+							<label htmlFor="role-select" className="block text-md font-semibold text-gray-700 mb-2">
 								What is your role?
 							</label>
 							<div className="flex justify-center space-x-6">
