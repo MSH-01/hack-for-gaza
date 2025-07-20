@@ -110,6 +110,11 @@ The app now includes comprehensive QR code functionality for sharing and accessi
 - **Error Handling**: Graceful handling of invalid or corrupted QR codes
 - **File Format Support**: Accepts JPG, PNG, GIF, and WebP image formats
 
+### PDF reports
+
+- **Download PDF**: Report can be downloaded directly on the device
+- **Share**: User can share the pdf on supported platforms
+
 ### Use Cases
 
 - **Emergency Handoffs**: Quickly transfer patient information between medical personnel
